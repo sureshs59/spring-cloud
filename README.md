@@ -59,9 +59,7 @@ src/main/
 
 ---
 
-## Copy-Paste Queries for GraphiQL
-
-### Queries
+## Queries for GraphiQL
 
 ```graphql
 # Fetch all expenses (paginated, default page 0 size 10)
