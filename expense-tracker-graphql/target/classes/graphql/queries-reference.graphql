@@ -1,0 +1,279 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Expense Tracker — Full GraphQL Query Reference
+#  Paste any block directly into http://localhost:8080/graphiql
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  QUERIES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 1. Fetch ALL expenses (default page 0, size 10, sorted by date DESC) ──────
+query FetchAllExpenses {
+  expenses {
+    totalElements
+    totalPages
+    currentPage
+    pageSize
+    content {
+      id
+      title
+      amount
+      category
+      date
+      description
+      createdAt
+    }
+  }
+}
+
+# ── 2. Fetch with filter: FOOD category, $10–$100, this month ─────────────────
+query FetchFoodExpenses {
+  expenses(
+    filter: {
+      category:   FOOD
+      minAmount:  10
+      maxAmount:  100
+      fromDate:   "2025-03-01"
+      toDate:     "2025-03-31"
+    }
+    pagination: {
+      page:      0
+      size:      20
+      sortBy:    AMOUNT
+      direction: DESC
+    }
+  ) {
+    totalElements
+    content {
+      id title amount category date
+    }
+  }
+}
+
+# ── 3. Search by keyword ──────────────────────────────────────────────────────
+query SearchExpenses {
+  expenses(filter: { searchText: "lunch" }) {
+    totalElements
+    content { id title amount category date }
+  }
+}
+
+# ── 4. Single expense by ID ───────────────────────────────────────────────────
+query GetExpenseById {
+  expense(id: "1") {
+    id
+    title
+    amount
+    category
+    date
+    description
+    createdAt
+    updatedAt
+  }
+}
+
+# ── 5. All expenses in a category ─────────────────────────────────────────────
+query GetByCategory {
+  expensesByCategory(category: TRANSPORT) {
+    id title amount date
+  }
+}
+
+# ── 6. Monthly summary bar chart data (pass the current year) ─────────────────
+query GetMonthlySummaries {
+  monthlySummaries(year: 2025) {
+    month
+    total
+    count
+    avgPerDay
+  }
+}
+
+# ── 7. Category pie chart data (full year) ────────────────────────────────────
+query GetCategoryBreakdownYearly {
+  categorySummaries(year: 2025) {
+    category
+    total
+    count
+    percentage
+  }
+}
+
+# ── 8. Category pie chart data (specific month) ───────────────────────────────
+query GetCategoryBreakdownMonthly {
+  categorySummaries(year: 2025, month: 3) {
+    category
+    total
+    count
+    percentage
+  }
+}
+
+# ── 9. Total spent in a date range ────────────────────────────────────────────
+query GetTotalSpent {
+  totalSpent(fromDate: "2025-01-01", toDate: "2025-03-31")
+}
+
+# ── 10. Predict next month's spending ────────────────────────────────────────
+query PredictSpending {
+  predictNextMonth
+}
+
+# ── 11. Budget status for a month ─────────────────────────────────────────────
+query GetBudgets {
+  budgets(monthYear: "2025-03") {
+    id
+    category
+    monthYear
+    limitAmount
+    spentAmount
+    remaining
+    isOverBudget
+  }
+}
+
+# ── 12. Single category budget ────────────────────────────────────────────────
+query GetFoodBudget {
+  budget(category: FOOD, monthYear: "2025-03") {
+    limitAmount
+    spentAmount
+    remaining
+    isOverBudget
+  }
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MUTATIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 13. Create a new expense ──────────────────────────────────────────────────
+mutation CreateExpense {
+  createExpense(input: {
+    title:       "Team lunch"
+    amount:      48.50
+    category:    FOOD
+    date:        "2025-03-20"
+    description: "Monthly team outing"
+  }) {
+    id
+    title
+    amount
+    category
+    date
+    createdAt
+  }
+}
+
+# ── 14. Update only the amount (partial update) ───────────────────────────────
+mutation UpdateAmount {
+  updateExpense(id: "1", input: { amount: 55.00 }) {
+    id title amount updatedAt
+  }
+}
+
+# ── 15. Update multiple fields ────────────────────────────────────────────────
+mutation UpdateExpenseFull {
+  updateExpense(id: "2", input: {
+    title:       "Updated title"
+    amount:      75.00
+    category:    ENTERTAINMENT
+    description: "Updated description"
+  }) {
+    id title amount category description updatedAt
+  }
+}
+
+# ── 16. Delete a single expense ───────────────────────────────────────────────
+mutation DeleteOne {
+  deleteExpense(id: "5") {
+    success
+    message
+    deletedId
+  }
+}
+
+# ── 17. Delete all expenses in a category ─────────────────────────────────────
+mutation DeleteCategory {
+  deleteByCategory(category: OTHER)
+}
+
+# ── 18. Set a monthly budget for a category ───────────────────────────────────
+mutation SetFoodBudget {
+  setBudget(
+    category:  FOOD
+    monthYear: "2025-03"
+    limit:     300.00
+  ) {
+    id category monthYear limitAmount isOverBudget
+  }
+}
+
+# ── 19. Delete a budget entry ─────────────────────────────────────────────────
+mutation DeleteBudget {
+  deleteBudget(category: FOOD, monthYear: "2025-03")
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SUBSCRIPTIONS
+#  Open in a separate GraphiQL tab — events arrive as mutations run
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 20. Listen for new expenses ───────────────────────────────────────────────
+subscription OnExpenseCreated {
+  expenseCreated {
+    id
+    title
+    amount
+    category
+    date
+  }
+}
+
+# ── 21. Listen for updated expenses ──────────────────────────────────────────
+subscription OnExpenseUpdated {
+  expenseUpdated {
+    id
+    title
+    amount
+    category
+    updatedAt
+  }
+}
+
+# ── 22. Listen for deleted expense IDs ───────────────────────────────────────
+subscription OnExpenseDeleted {
+  expenseDeleted
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  VARIABLES EXAMPLES (use with the "Variables" panel in GraphiQL)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Query using variables — paste in Query panel:
+#
+# query GetExpense($id: ID!) {
+#   expense(id: $id) { id title amount category }
+# }
+#
+# Variables panel:
+# { "id": "3" }
+
+# Mutation using variables — paste in Query panel:
+#
+# mutation CreateExp($input: CreateExpenseInput!) {
+#   createExpense(input: $input) { id title amount }
+# }
+#
+# Variables panel:
+# {
+#   "input": {
+#     "title":    "Coffee",
+#     "amount":   4.50,
+#     "category": "FOOD",
+#     "date":     "2025-03-21"
+#   }
+# }

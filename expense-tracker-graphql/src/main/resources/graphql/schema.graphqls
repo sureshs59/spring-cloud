@@ -1,0 +1,163 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Expense Tracker GraphQL Schema
+#  File: src/main/resources/graphql/schema.graphqls
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Enums ─────────────────────────────────────────────────────────────────────
+
+enum Category {
+    FOOD
+    TRANSPORT
+    ENTERTAINMENT
+    HEALTH
+    UTILITIES
+    SHOPPING
+    EDUCATION
+    OTHER
+}
+
+enum SortField {
+    DATE
+    AMOUNT
+    CATEGORY
+}
+
+enum SortDirection {
+    ASC
+    DESC
+}
+
+# ── Core Types ────────────────────────────────────────────────────────────────
+
+type Expense {
+    id:          ID!
+    title:       String!
+    amount:      Float!
+    category:    Category!
+    date:        String!
+    description: String
+    createdAt:   String!
+    updatedAt:   String!
+}
+
+type MonthlySummary {
+    month:       String!        # e.g. "2025-01"
+    total:       Float!
+    count:       Int!
+    avgPerDay:   Float!
+}
+
+type CategorySummary {
+    category:    Category!
+    total:       Float!
+    count:       Int!
+    percentage:  Float!
+}
+
+type ExpensePage {
+    content:        [Expense!]!
+    totalElements:  Int!
+    totalPages:     Int!
+    currentPage:    Int!
+    pageSize:       Int!
+}
+
+type DeleteResult {
+    success:    Boolean!
+    message:    String!
+    deletedId:  ID!
+}
+
+# ── Input Types ───────────────────────────────────────────────────────────────
+
+input CreateExpenseInput {
+    title:       String!
+    amount:      Float!
+    category:    Category!
+    date:        String!
+    description: String
+}
+
+input UpdateExpenseInput {
+    title:       String
+    amount:      Float
+    category:    Category
+    date:        String
+    description: String
+}
+
+input ExpenseFilterInput {
+    category:    Category
+    fromDate:    String
+    toDate:      String
+    minAmount:   Float
+    maxAmount:   Float
+    searchText:  String
+}
+
+input PaginationInput {
+    page:       Int  = 0
+    size:       Int  = 10
+    sortBy:     SortField     = DATE
+    direction:  SortDirection = DESC
+}
+
+# ── Queries ───────────────────────────────────────────────────────────────────
+
+type Query {
+
+    # Fetch a single expense by ID
+    expense(id: ID!): Expense
+
+    # Fetch all expenses (with optional filter + pagination)
+    expenses(
+        filter:     ExpenseFilterInput
+        pagination: PaginationInput
+    ): ExpensePage!
+
+    # Fetch expenses by category
+    expensesByCategory(category: Category!): [Expense!]!
+
+    # Monthly breakdown for a given year
+    monthlySummaries(year: Int!): [MonthlySummary!]!
+
+    # Category-wise totals (for pie chart)
+    categorySummaries(year: Int, month: Int): [CategorySummary!]!
+
+    # Total spent in a date range
+    totalSpent(fromDate: String!, toDate: String!): Float!
+
+    # Predict next month's spending (calls ML logic)
+    predictNextMonth: Float!
+}
+
+# ── Mutations ─────────────────────────────────────────────────────────────────
+
+type Mutation {
+
+    # Create a new expense
+    createExpense(input: CreateExpenseInput!): Expense!
+
+    # Update an existing expense
+    updateExpense(id: ID!, input: UpdateExpenseInput!): Expense!
+
+    # Delete an expense
+    deleteExpense(id: ID!): DeleteResult!
+
+    # Delete all expenses in a category
+    deleteByCategory(category: Category!): Int!
+}
+
+# ── Subscriptions ─────────────────────────────────────────────────────────────
+
+type Subscription {
+
+    # Fires when any new expense is created
+    expenseCreated: Expense!
+
+    # Fires when any expense is updated
+    expenseUpdated: Expense!
+
+    # Fires when any expense is deleted  (returns deleted ID)
+    expenseDeleted: ID!
+}
