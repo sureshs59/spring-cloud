@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+# External API base URLs
+api:
+  user-service:    http://localhost:8081
+  product-service: http://localhost:8082
+  order-service:   http://localhost:8083
+  payment-service: http://localhost:8084
+
+# Resilience4j
+resilience4j:
+  retry:
+    instances:
+      userService:
+        max-attempts: 3
+        wait-duration: 500ms
+        exponential-backoff-multiplier: 2
+  circuitbreaker:
+    instances:
+      userService:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 10
