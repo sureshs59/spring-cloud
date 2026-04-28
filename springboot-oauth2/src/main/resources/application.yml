@@ -1,0 +1,70 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: springboot-oauth2
+
+  # ── H2 In-Memory Database ─────────────────────────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:oauth2db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true              # access at http://localhost:8080/h2-console
+      path: /h2-console
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop      # auto-creates tables from entities on startup
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ── OAuth2 Client Configuration ───────────────────────────────────────────
+  # Replace YOUR_GOOGLE_CLIENT_ID and YOUR_GOOGLE_CLIENT_SECRET
+  # with real values from https://console.cloud.google.com/
+  #
+  # For LOCAL TESTING without Google credentials:
+  #   → Comment out the oauth2 block below
+  #   → Use the /api/auth/register + /api/auth/login endpoints with JWT only
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: YOUR_GOOGLE_CLIENT_ID
+            client-secret: YOUR_GOOGLE_CLIENT_SECRET
+            scope:
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+
+          github:
+            client-id: YOUR_GITHUB_CLIENT_ID
+            client-secret: YOUR_GITHUB_CLIENT_SECRET
+            scope:
+              - read:user
+              - user:email
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+
+# ── JWT Configuration ─────────────────────────────────────────────────────
+jwt:
+  secret: mySecretKey_Change_This_In_Production_Must_Be_At_Least_256_Bits_Long_1234
+  expiration-ms: 86400000     # 24 hours in milliseconds
+
+# ── App OAuth2 Redirect ───────────────────────────────────────────────────
+app:
+  oauth2:
+    authorized-redirect-uri: http://localhost:8080/oauth2/success
+
+# ── Logging ───────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.example: DEBUG
+    org.springframework.security: INFO
