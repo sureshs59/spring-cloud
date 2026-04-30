@@ -1,0 +1,52 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: rate-fetcher-service
+
+  # ── PostgreSQL via Neon.tech (free cloud database) ──────────────
+  # Sign up free at https://neon.tech → create project → copy connection string
+  datasource:
+    #url: jdbc:postgresql://<YOUR_NEON_HOST>.neon.tech/goldexchange?sslmode=require
+    url: jdbc:postgresql://<YOUR_NEON_HOST>.neon.tech/neondb?sslmode=require
+    username: <username>
+    password: <password>
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3       # Neon free tier allows limited connections
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update           # auto-creates tables from entities
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+# ── MetalPriceAPI configuration ─────────────────────────────────
+# Sign up free at https://metalpriceapi.com → copy your API key
+metal-price-api:
+  base-url: https://api.metalpriceapi.com/v1
+  api-key: <Api key>   # free tier: 100 requests/day
+  base-currency: INR                 # Indian Rupees
+
+# ── Scheduler configuration ─────────────────────────────────────
+scheduler:
+  # Fetch rates every day at 10:00 AM IST (04:30 UTC)
+  cron: "0 30 4 * * *"
+  # Also fetch every 4 hours during market hours for fresher data
+  intraday-cron: "0 0 5,9,13 * * MON-FRI"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    com.goldexchange: DEBUG
+    org.springframework.web: INFO
