@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+# ── Downstream mock service URLs ──────────────────────────────
+# In production replace with real service URLs.
+# In tests WireMock overrides these automatically.
+api:
+  user-service:    http://localhost:9001
+  product-service: http://localhost:9002
+  order-service:   http://localhost:9003
+  payment-service: http://localhost:9004
+
+# ── Async thread pool (Pattern 2 & 4) ─────────────────────────
+async:
+  pool:
+    core-size:     10
+    max-size:      50
+    queue-capacity: 100
+    thread-prefix: "api-exec-"
+
+# ── Feign logging ─────────────────────────────────────────────
+logging:
+  level:
+    com.example.restpatterns: DEBUG
+    com.example.restpatterns.client: DEBUG
+
+# ── Resilience4j (Pattern 5) ──────────────────────────────────
+resilience4j:
+  retry:
+    instances:
+      userService:
+        max-attempts: 3
+        wait-duration: 500ms
+        exponential-backoff-multiplier: 2     # 500ms, 1000ms, 2000ms
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.HttpServerErrorException
+        ignore-exceptions:
+          - com.example.restpatterns.exception.ResourceNotFoundException  # don't retry 404!
+
+  circuitbreaker:
+    instances:
+      userService:
+        register-health-indicator: true
+        failure-rate-threshold: 50             # 50% failures = OPEN
+        slow-call-rate-threshold: 50           # 50% slow = OPEN
+        slow-call-duration-threshold: 2s
+        wait-duration-in-open-state: 10s
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+
+  rate-limiter:
+    instances:
+      userService:
+        limit-for-period: 10                   # 10 calls per period
+        limit-refresh-period: 1s               # refresh every 1 second
+        timeout-duration: 0                    # fail immediately if limited
+# ── Actuator (expose circuit breaker health) ──────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,retries
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
