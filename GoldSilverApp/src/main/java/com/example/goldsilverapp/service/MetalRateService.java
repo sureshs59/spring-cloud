@@ -1,41 +1,55 @@
 package com.example.goldsilverapp.service;
 
-import com.example.goldsilverapp.model.MetalRate;
-import com.example.goldsilverapp.model.RateHistory;
+import com.example.goldsilverapp.dto.MetalRateResponse;
+import com.example.goldsilverapp.dto.RateHistoryResponse;
+import com.example.goldsilverapp.entity.MetalRateEntity;
+import com.example.goldsilverapp.repository.MetalRateRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class MetalRateService {
-    public List<MetalRate> getTodayRates() {
+    private final MetalRateRepository repository;
+
+    public MetalRateService(MetalRateRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<MetalRateResponse> getTodayRates() {
         return List.of(
-                new MetalRate("Gold", 72500, 71800, "10 gram"),
-                new MetalRate("Silver", 83500, 84200, "1 kg")
+                buildTodayRate("Gold"),
+                buildTodayRate("Silver")
         );
     }
 
-    public List<RateHistory> getGoldHistory() {
-        return List.of(
-                new RateHistory("Apr 24", 70500),
-                new RateHistory("Apr 25", 71000),
-                new RateHistory("Apr 26", 71250),
-                new RateHistory("Apr 27", 71800),
-                new RateHistory("Apr 28", 72000),
-                new RateHistory("Apr 29", 71800),
-                new RateHistory("Apr 30", 72500)
+    private MetalRateResponse buildTodayRate(String metal) {
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+
+        MetalRateEntity todayRate = repository.findByMetalAndRateDate(metal, today)
+                .orElseThrow(() -> new RuntimeException("Today rate not found for " + metal));
+
+        MetalRateEntity yesterdayRate = repository.findByMetalAndRateDate(metal, yesterday)
+                .orElseThrow(() -> new RuntimeException("Yesterday rate not found for " + metal));
+
+        return new MetalRateResponse(
+                metal,
+                todayRate.getPrice(),
+                yesterdayRate.getPrice(),
+                todayRate.getUnit()
         );
     }
-
-    public List<RateHistory> getSilverHistory() {
-        return List.of(
-                new RateHistory("Apr 24", 82500),
-                new RateHistory("Apr 25", 83000),
-                new RateHistory("Apr 26", 83800),
-                new RateHistory("Apr 27", 84500),
-                new RateHistory("Apr 28", 84000),
-                new RateHistory("Apr 29", 84200),
-                new RateHistory("Apr 30", 83500)
-        );
+    public List<RateHistoryResponse> getHistory(String metal) {
+        return repository.findTop7ByMetalOrderByRateDateDesc(metal)
+                .stream()
+                .sorted(Comparator.comparing(MetalRateEntity::getRateDate))
+                .map(rate -> new RateHistoryResponse(
+                        rate.getRateDate().toString(),
+                        rate.getPrice()
+                ))
+                .toList();
     }
 }

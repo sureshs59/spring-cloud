@@ -1,12 +1,9 @@
 package com.example.goldsilverapp.controller;
 
-import com.example.goldsilverapp.model.MetalRate;
-import com.example.goldsilverapp.model.RateHistory;
+import com.example.goldsilverapp.dto.MetalRateResponse;
+import com.example.goldsilverapp.dto.RateHistoryResponse;
 import com.example.goldsilverapp.service.MetalRateService;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,17 +19,12 @@ public class MetalRateController {
     }
 
     @GetMapping("/today")
-    public List<MetalRate> getTodayRates() {
+    public List<MetalRateResponse> getTodayRates() {
         return service.getTodayRates();
     }
 
-    @GetMapping("/history/gold")
-    public List<RateHistory> getGoldHistory() {
-        return service.getGoldHistory();
-    }
-
-    @GetMapping("/history/silver")
-    public List<RateHistory> getSilverHistory() {
-        return service.getSilverHistory();
+    @GetMapping("/history/{metal}")
+    public List<RateHistoryResponse> getHistory(@PathVariable String metal) {
+        return service.getHistory(metal);
     }
 }
