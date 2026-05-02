@@ -9,10 +9,10 @@ spring:
   # Sign up free at https://neon.tech → create project → copy connection string
   datasource:
     #url: jdbc:postgresql://<YOUR_NEON_HOST>.neon.tech/goldexchange?sslmode=require
-    url: jdbc:postgresql://ep-sweet-union-amuenio8.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require
-    username: neondb_owner
-    password: npg_FrcN1G2SUEqY
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:mysql://localhost:3306/metals_db
+    username: root
+    password: Mysql@2026
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 3       # Neon free tier allows limited connections
       connection-timeout: 30000
@@ -20,10 +20,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update           # auto-creates tables from entities
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
 # ── MetalPriceAPI configuration ─────────────────────────────────
@@ -31,7 +31,7 @@ spring:
 metal-price-api:
   base-url: https://api.metalpriceapi.com/v1
   api-key: e10618b7d0ebab7c105c063d162071d5   # free tier: 100 requests/day
-  base-currency: INR                 # Indian Rupees
+  base-currency: USD                 # Indian Rupees
 
 # ── Scheduler configuration ─────────────────────────────────────
 scheduler:

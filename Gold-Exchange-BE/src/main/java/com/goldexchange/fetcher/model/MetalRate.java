@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(
-    name = "metal_rates",
+    name = "metal_prices",
     uniqueConstraints = @UniqueConstraint(columnNames = {"rate_date", "metal"})
 )
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
