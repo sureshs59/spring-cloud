@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface MetalRateRepository extends JpaRepository<MetalRateEntity, Long> {
     Optional<MetalRateEntity> findByMetalAndRateDate(String metal, LocalDate rateDate);
     List<MetalRateEntity> findTop7ByMetalOrderByRateDateDesc(String metal);
+
+    List<MetalRateEntity> findByMetalOrderByRateDateAsc(String metal);
 }

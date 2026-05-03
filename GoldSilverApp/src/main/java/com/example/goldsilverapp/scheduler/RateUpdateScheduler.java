@@ -42,37 +42,34 @@ public class RateUpdateScheduler {
     }
 
     private void saveTodayRates() {
-        LocalDate today = LocalDate.now();
-        List<ExternalRateResponse> fetchTodayRates = externalRateService.fetchTodayRates();;
+        try {
+            LocalDate today = LocalDate.now();
 
-        for (ExternalRateResponse externalRateResponse : fetchTodayRates) {
-//            boolean exists = repository.findByMetalAndRateDate(externalRateResponse.getMetal(), today)
-//                    .isPresent();
+            List<ExternalRateResponse> rates = externalRateService.fetchTodayRates();
 
-            MetalRateEntity entity = repository
-                    .findByMetalAndRateDate(externalRateResponse.getMetal(), today)
-                    .orElse(new MetalRateEntity());
+            for (ExternalRateResponse rate : rates) {
 
-//            if(!exists){
-//                MetalRateEntity entity = new MetalRateEntity();
-                entity.setMetal(externalRateResponse.getMetal());
+                MetalRateEntity entity = repository
+                        .findByMetalAndRateDate(rate.getMetal(), today)
+                        .orElse(new MetalRateEntity());
+
+                entity.setMetal(rate.getMetal());
                 entity.setRateDate(today);
-                entity.setPrice(externalRateResponse.getPrice());
-                entity.setUnit(externalRateResponse.getUnit());
-                System.out.println(entity.getPrice()+"-Price updated for.."+entity.getMetal());
-                repository.save(entity);
-                System.out.println("Saved rate: "
-                        + externalRateResponse.getMetal()
-                        + " - "
-                        + externalRateResponse.getPrice());
-//            } else{
-//                System.out.println("Rate already exists for "
-//                        + externalRateResponse.getMetal()
-//                        + " on "
-//                        + today);
-//            }
+                entity.setPrice(rate.getPrice());
+                entity.setUnit(rate.getUnit());
 
+                repository.save(entity);
+
+                System.out.println("Saved/Updated rate: "
+                        + rate.getMetal()
+                        + " - "
+                        + rate.getPrice());
+            }
+
+        } catch (Exception ex) {
+            System.err.println("Failed to update rates: " + ex.getMessage());
         }
+
     }
 
 }
