@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: jwt-demo-backend
+
+# ── JWT Configuration ─────────────────────────────────────────────
+# In production: store secret in AWS Secrets Manager or Vault
+# Must be at least 256 bits (32 chars) for HMAC-SHA256
+jwt:
+  secret: jwt-demo-super-secret-key-for-learning-purposes-2025
+  expiration-ms: 900000      # 15 minutes (access token)
+  refresh-exp-ms: 86400000   # 24 hours  (refresh token)
+
+# ── CORS — allow Angular dev server ──────────────────────────────
+cors:
+  allowed-origins: "http://localhost:4200"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.jwtdemo: DEBUG
