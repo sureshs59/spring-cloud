@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: kafka-spring-boot-app
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    
+    # Producer configuration
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 100
+      compression-type: snappy
+    
+    # Consumer configuration
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: claims-processor-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      auto-commit-interval-ms: 1000
+      max-poll-records: 100
+      properties:
+        spring.json.trusted.packages: '*'
+
+# Custom Kafka topic names
+kafka:
+  topic:
+    claims: claims-events
+    claims-processed: processed-claims
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.carefirst.kafka: DEBUG
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
