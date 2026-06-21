@@ -26,4 +26,20 @@ public class ProductService {
 		return  productRepository.findByCategory(category);
 				//).elseThrow(() -> new RuntimeException("No products found in category: " + category));
 	}
+	
+	//Save using GraphQL Mutation
+	public Product updateStock(Integer id,Integer stock) {
+		//Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+		Product existProduct = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+		existProduct.setStock(stock);
+		return productRepository.save(existProduct);
+	}
+	
+	public Product receivedNewPrice(Integer id, double price) {
+		//Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+		Product existProduct = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+		existProduct.setPrice(price);
+		return productRepository.save(existProduct);
+	}
+	
 }
