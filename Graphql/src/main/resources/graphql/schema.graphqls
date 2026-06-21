@@ -11,3 +11,9 @@ type Query{
 	getAllProducts: [Product],
 	getProductByCategory(category: String): [Product]
 }
+
+type Mutation{
+	updateStock(id: ID, stock: Int): Product,
+	receivedNewPrice(id: ID, price: Float): Product,
+	saveProduct(name: String, category: String, stock: Int, price: Float) : Product
+}
