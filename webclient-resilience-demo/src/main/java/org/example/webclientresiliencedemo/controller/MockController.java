@@ -30,8 +30,8 @@ public class MockController {
         return new Profile("Detroit");
     }
 
-    @GetMapping("/profile-fail/{id}")
-    public Profile getProfileFail(@PathVariable Long id) {
+    @GetMapping("/profile-fail")
+    public Profile getProfileFail() {
         throw new RuntimeException("Profile service is down");
     }
 }
