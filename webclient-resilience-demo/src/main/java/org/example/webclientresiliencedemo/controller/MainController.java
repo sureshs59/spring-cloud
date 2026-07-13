@@ -29,7 +29,7 @@ public class MainController {
         return aggregationService.getDependent(id);
     }
     @GetMapping("/profile-fallback/{id}")
-    public Mono<Profile> profileFallback(@PathVariable Long id) {
+    public Profile profileFallback(@PathVariable Long id) {
         System.out.println("profile fallback called...");
         return aggregationService.getProfileFailing(id);
     }
