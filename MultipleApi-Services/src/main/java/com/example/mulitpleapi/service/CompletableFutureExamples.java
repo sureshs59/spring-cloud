@@ -1,4 +1,4 @@
-package com.example.mulitpleapi.service;
+package com.example;
 
 import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
@@ -105,7 +105,8 @@ public class CompletableFutureExamples {
 		
 		// Multiple tasks executing at once using allOf() and get the results from thenRun() 
 		// allOf() method are holding different threads for independent tasks
-		
+		Object myLatestValue = stockTask.join();
+		System.out.println("myLatestValue ::: " + myLatestValue);
 		allTasks.thenRun( 
 				 () -> {
 				 String T1 = weatherTask.join();
